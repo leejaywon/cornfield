@@ -981,12 +981,12 @@ app.get('/api/videos', async (request) => {
   const randomSeedRaw = Number(query.randomSeed);
   const orderBy = {
     random: buildRandomOrderBy(randomSeedRaw),
-    upload_desc: `date(substr(v.created_at, 1, 10)) DESC, ${buildRandomOrderBy(randomSeedRaw)}`,
-    upload_asc: `date(substr(v.created_at, 1, 10)) ASC, ${buildRandomOrderBy(randomSeedRaw)}`,
-    views_desc: `v.view_count DESC, ${buildRandomOrderBy(randomSeedRaw)}`,
-    views_asc: `v.view_count ASC, ${buildRandomOrderBy(randomSeedRaw)}`,
-    rating_desc: `CASE WHEN cr.rating_count > 0 THEN 0 ELSE 1 END ASC, COALESCE(cr.average_rating, 0) DESC, v.view_count DESC, ${buildRandomOrderBy(randomSeedRaw)}`,
-    rating_asc: `CASE WHEN cr.rating_count > 0 THEN 0 ELSE 1 END ASC, COALESCE(cr.average_rating, 0) ASC, v.view_count ASC, ${buildRandomOrderBy(randomSeedRaw)}`
+    upload_desc: `v.created_at DESC, v.updated_at DESC, ${buildRandomOrderBy(randomSeedRaw)}`,
+    upload_asc: `v.created_at ASC, v.updated_at ASC, ${buildRandomOrderBy(randomSeedRaw)}`,
+    views_desc: `v.view_count DESC, MAX(cr.average_rating) DESC, ${buildRandomOrderBy(randomSeedRaw)}`,
+    views_asc: `v.view_count ASC, MAX(cr.average_rating) DESC, ${buildRandomOrderBy(randomSeedRaw)}`,
+    rating_desc: `CASE WHEN MAX(cr.rating_count) > 0 THEN 0 ELSE 1 END ASC, ROUND(COALESCE(MAX(cr.average_rating), 0), 1) DESC, MAX(cr.rating_count) DESC, v.view_count DESC, ${buildRandomOrderBy(randomSeedRaw)}`,
+    rating_asc: `CASE WHEN MAX(cr.rating_count) > 0 THEN 0 ELSE 1 END ASC, ROUND(COALESCE(MAX(cr.average_rating), 0), 1) ASC, MAX(cr.rating_count) DESC, v.view_count DESC, ${buildRandomOrderBy(randomSeedRaw)}`
   }[sort] || buildRandomOrderBy(randomSeedRaw);
 
   const whereSql = `WHERE ${whereClauses.join(' AND ')}`;
